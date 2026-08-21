@@ -66,6 +66,14 @@ create table if not exists public.push_subscriptions (
   created_at timestamptz default now()
 );
 
+-- 7. Messages table (Public Real-time Community Chat)
+create table if not exists public.messages (
+  id uuid primary key default gen_random_uuid(),
+  content text not null check (char_length(trim(content)) > 0 and char_length(content) <= 500),
+  sender_name text not null check (char_length(trim(sender_name)) > 0 and char_length(sender_name) <= 50),
+  created_at timestamptz default now()
+);
+
 -- ============================================
 -- Indexes
 -- ============================================
@@ -76,6 +84,7 @@ create index if not exists idx_posts_subject on public.posts(subject);
 create index if not exists idx_schedule_entries_day_id on public.schedule_entries(day_id);
 create index if not exists idx_timetable_day_of_week on public.timetable(day_of_week);
 create index if not exists idx_push_subs_endpoint on public.push_subscriptions(endpoint);
+create index if not exists idx_messages_created_at on public.messages(created_at asc);
 
 -- ============================================
 -- Row Level Security (RLS)
@@ -88,6 +97,7 @@ alter table public.posts enable row level security;
 alter table public.schedule_entries enable row level security;
 alter table public.timetable enable row level security;
 alter table public.push_subscriptions enable row level security;
+alter table public.messages enable row level security;
 
 -- Public read access for all tables (no login required to view)
 create policy "Public read access" on public.days
@@ -114,6 +124,16 @@ create policy "Public read push" on public.push_subscriptions
 
 create policy "Public delete push" on public.push_subscriptions
   for delete using (true);
+
+-- Messages: public can read and insert messages
+create policy "Public read messages" on public.messages
+  for select using (true);
+
+create policy "Public insert messages" on public.messages
+  for insert with check (true);
+
+-- Realtime Publication for live updates
+alter publication supabase_realtime add table public.messages;
 
 -- Admin write access (only authenticated users whose email is in admins table)
 create policy "Admin insert" on public.posts

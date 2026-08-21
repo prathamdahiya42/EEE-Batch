@@ -105,3 +105,11 @@ export interface LiveSlotState {
   isFreeDay: boolean;
   dayName: string;
 }
+
+// Real-time Chat message
+export interface ChatMessage {
+  id: string;
+  content: string;
+  sender_name: string;
+  created_at: string;
+}
