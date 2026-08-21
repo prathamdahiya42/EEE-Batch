@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseConfig } from '@/lib/supabase/config';
 
 function getDirectSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key);
+  const { url, anonKey } = getSupabaseConfig();
+  if (!url || !anonKey) return null;
+  return createClient(url, anonKey);
 }
 
 export async function POST(req: NextRequest) {

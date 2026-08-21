@@ -3,14 +3,14 @@ import { WEEKLY_TIMETABLE, timeToMinutes } from '@/lib/timetable-data';
 import { sendPushNotificationToAll } from '@/lib/push-server';
 import { createClient } from '@supabase/supabase-js';
 import { getTodayDateString } from '@/lib/constants';
+import { getSupabaseConfig } from '@/lib/supabase/config';
 
 export const dynamic = 'force-dynamic';
 
 function getDirectSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key);
+  const { url, anonKey } = getSupabaseConfig();
+  if (!url || !anonKey) return null;
+  return createClient(url, anonKey);
 }
 
 export async function GET() {
