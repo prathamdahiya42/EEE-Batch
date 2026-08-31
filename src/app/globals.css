@@ -52,6 +52,8 @@
    ============================================ */
 html {
   scroll-behavior: smooth;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -62,7 +64,20 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+
+button, a, input, select, textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 
 /* ============================================
    Glassmorphism System Spec
