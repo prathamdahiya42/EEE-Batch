@@ -25,10 +25,35 @@ export default async function HomePage() {
       <ScheduleStrip entries={data?.schedule || []} />
 
       {/* Main content */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6">
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-5 space-y-5">
+        {/* Attendance & Bunk Manager Quick Access Card */}
+        <div className="glass-card p-4 flex items-center justify-between gap-4 border-[#FF4F9A]/30 bg-white/70 shadow-xs hover:border-[#FF4F9A] transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#FF4F9A]/15 border border-[#FF4F9A]/30 flex items-center justify-center text-xl shrink-0">
+              📊
+            </div>
+            <div>
+              <h2 className="font-display text-sm font-bold text-[#3D2C36]">
+                Per-Class Attendance & Bunk Math
+              </h2>
+              <p className="font-mono text-[11px] text-[#3D2C36]/60">
+                Log today&apos;s classes, check safe-to-bunk quotas, and set alarms
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/attendance"
+            className="glass-btn-primary px-4 py-2 text-xs font-bold shrink-0 inline-flex items-center gap-1 shadow-sm"
+          >
+            <span>Mark Today</span>
+            <span>→</span>
+          </Link>
+        </div>
+
         {/* Subject quick links */}
         {data && data.schedule.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-2">
             {[...new Set(data.posts.map((p) => p.subject).filter(Boolean))].map(
               (subject) => (
                 <Link
@@ -68,7 +93,16 @@ export default async function HomePage() {
 
       {/* Glass footer */}
       <footer className="max-w-3xl w-full mx-auto px-4 py-8 mt-auto">
-        <div className="glass-card px-6 py-3 flex items-center justify-center gap-6 text-center flex-wrap">
+        <div className="glass-card px-6 py-3 flex items-center justify-center gap-5 text-center flex-wrap">
+          <Link
+            href="/attendance"
+            className="font-display text-xs font-bold text-[#FF4F9A] hover:text-[#C2185B]
+                       transition-colors tracking-wide uppercase flex items-center gap-1"
+          >
+            <span>📊</span>
+            <span>Attendance</span>
+          </Link>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FFD9E8]" />
           <Link
             href="/timetable"
             className="font-display text-xs font-semibold text-[#3D2C36]/70 hover:text-[#FF4F9A]

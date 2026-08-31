@@ -1,0 +1,11 @@
+# EEE Batch Pulse — Class Timeline
+
+[EEE Batch Pulse](http://localhost:3000/)
+
+# EEE Batch Pulse
+[Books 📚](http://localhost:3000/books)
+No schedule data for this day
+No posts recorded for today yet.
+Waiting for admin to initialize today's schedule
+[Book Recs 📚](http://localhost:3000/books)
+[Admin Panel ⚙️](http://localhost:3000/admin)

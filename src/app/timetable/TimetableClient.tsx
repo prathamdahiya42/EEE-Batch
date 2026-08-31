@@ -84,24 +84,35 @@ export default function TimetableClient({ overrides }: TimetableClientProps) {
             </div>
           </div>
 
-          {/* Batch Selector */}
-          <div className="flex items-center p-1 rounded-2xl bg-white/70 border border-[#FFD9E8] shadow-2xs">
-            {(['ALL', 'B1', 'B2'] as BatchOption[]).map((b) => (
-              <button
-                key={b}
-                onClick={() => handleBatchChange(b)}
-                className={`
-                  px-3 py-1 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer
-                  ${
-                    batchPref === b
-                      ? 'bg-[#FF4F9A] text-white shadow-xs'
-                      : 'text-[#3D2C36]/60 hover:text-[#3D2C36]'
-                  }
-                `}
-              >
-                {b === 'ALL' ? 'All Batches' : `Batch ${b}`}
-              </button>
-            ))}
+          {/* Right: Attendance and Batch Selector */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/attendance"
+              className="glass-btn-primary px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1 shadow-2xs"
+            >
+              <span>📊</span>
+              <span className="hidden sm:inline">Mark Attendance</span>
+            </Link>
+
+            {/* Batch Selector */}
+            <div className="flex items-center p-1 rounded-2xl bg-white/70 border border-[#FFD9E8] shadow-2xs">
+              {(['ALL', 'B1', 'B2'] as BatchOption[]).map((b) => (
+                <button
+                  key={b}
+                  onClick={() => handleBatchChange(b)}
+                  className={`
+                    px-2.5 sm:px-3 py-1 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer
+                    ${
+                      batchPref === b
+                        ? 'bg-[#FF4F9A] text-white shadow-xs'
+                        : 'text-[#3D2C36]/60 hover:text-[#3D2C36]'
+                    }
+                  `}
+                >
+                  {b === 'ALL' ? 'All' : `B${b.replace('B', '')}`}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </header>

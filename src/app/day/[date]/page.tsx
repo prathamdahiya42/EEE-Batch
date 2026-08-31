@@ -43,12 +43,28 @@ export default async function DayPage({ params }: DayPageProps) {
       <ScheduleStrip entries={data?.schedule || []} />
 
       {/* Main content */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6">
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-4">
+        {/* Attendance Action Bar for this day */}
+        <div className="glass-card p-3.5 flex items-center justify-between gap-3 border-[#FF4F9A]/20 bg-white/70">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📊</span>
+            <span className="font-display text-xs font-bold text-[#3D2C36]">
+              Track Attendance for {formatDateDisplay(date)}
+            </span>
+          </div>
+          <Link
+            href={`/attendance`}
+            className="glass-btn-primary px-3.5 py-1.5 text-xs font-bold shrink-0"
+          >
+            Mark Day →
+          </Link>
+        </div>
+
         {data ? (
           <>
             {/* Subject quick links */}
             {data.schedule.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {[...new Set(data.posts.map((p) => p.subject).filter(Boolean))].map(
                   (subject) => (
                     <Link
@@ -109,6 +125,14 @@ export default async function DayPage({ params }: DayPageProps) {
       {/* Footer */}
       <footer className="max-w-3xl w-full mx-auto px-4 py-8 mt-auto">
         <div className="glass-card px-6 py-3 flex items-center justify-center gap-6 text-center">
+          <Link
+            href="/attendance"
+            className="font-display text-xs font-bold text-[#FF4F9A] hover:text-[#C2185B]
+                       transition-colors tracking-wide uppercase"
+          >
+            Attendance 📊
+          </Link>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FFD9E8]" />
           <Link
             href="/"
             className="font-display text-xs font-semibold text-[#3D2C36]/70 hover:text-[#FF4F9A]

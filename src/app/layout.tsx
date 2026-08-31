@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import NowNextBar from '@/components/ui/NowNextBar';
 import NotificationPrompt from '@/components/ui/NotificationPrompt';
+import BottomNavBar from '@/components/ui/BottomNavBar';
 import { getTodayWithData } from '@/lib/queries';
 
 export const metadata: Metadata = {
@@ -46,10 +47,14 @@ export default async function RootLayout({
         <NotificationPrompt />
 
         {/* App Content */}
-        <div className="relative z-0 min-h-[calc(100vh-60px)] flex flex-col">
+        <div className="relative z-0 min-h-[calc(100vh-60px)] flex flex-col pb-20 sm:pb-0">
           {children}
         </div>
+
+        {/* Floating Mobile Bottom Navigation Bar (<640px) */}
+        <BottomNavBar />
       </body>
     </html>
   );
 }
+

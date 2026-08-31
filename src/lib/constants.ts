@@ -2,9 +2,124 @@
 // EEE Batch Pulse — Constants
 // ============================================
 
-import type { PostType, ScheduleStatus } from './types';
+import type {
+  PostType,
+  ScheduleStatus,
+  AttendanceStatus,
+  AttendanceSettings,
+  SemesterSettings,
+  HolidayEntry,
+} from './types';
 
 export const BATCH_NAME = 'EEE Batch Pulse';
+
+export const DEFAULT_ATTENDANCE_SETTINGS: AttendanceSettings = {
+  targetPercentage: 75,
+  rollingWindowDays: 7,
+  weeklyBackdatedLimit: 3,
+  termRemainingWeeks: 12,
+  notifyLowAttendance: true,
+  classAlarmMinutesBefore: 10,
+  alarmSoundEnabled: true,
+  favoriteSubjectAlerts: [],
+  batch: 'B1',
+};
+
+export const DEFAULT_SEMESTER_SETTINGS: SemesterSettings = {
+  studentId: 'student_default',
+  startDate: '2026-08-01',
+  endDate: '2026-12-24',
+  targetPercent: 0.75, // 75% default
+  batch: 'B1',
+};
+
+
+export const DEFAULT_GAZETTED_HOLIDAYS: HolidayEntry[] = [
+  { id: 'gh-1', date: '2026-08-15', type: 'gazetted', label: 'Independence Day', isHoliday: true },
+  { id: 'gh-2', date: '2026-08-28', type: 'gazetted', label: 'Raksha Bandhan', isHoliday: true },
+  { id: 'gh-3', date: '2026-09-04', type: 'gazetted', label: 'Janmashtami', isHoliday: true },
+  { id: 'gh-4', date: '2026-09-16', type: 'gazetted', label: 'Milad-un-Nabi', isHoliday: true },
+  { id: 'gh-5', date: '2026-10-02', type: 'gazetted', label: 'Mahatma Gandhi Jayanti', isHoliday: true },
+  { id: 'gh-6', date: '2026-10-20', type: 'gazetted', label: 'Maha Navami / Dussehra Eve', isHoliday: true },
+  { id: 'gh-7', date: '2026-10-21', type: 'gazetted', label: 'Dussehra (Vijaya Dashami)', isHoliday: true },
+  { id: 'gh-8', date: '2026-11-08', type: 'gazetted', label: 'Diwali (Deepavali)', isHoliday: true },
+  { id: 'gh-9', date: '2026-11-09', type: 'gazetted', label: 'Govardhan Puja', isHoliday: true },
+  { id: 'gh-10', date: '2026-11-11', type: 'gazetted', label: 'Bhai Dooj', isHoliday: true },
+  { id: 'gh-11', date: '2026-11-24', type: 'gazetted', label: 'Guru Nanak Jayanti', isHoliday: true },
+  { id: 'gh-12', date: '2026-12-25', type: 'gazetted', label: 'Christmas Day', isHoliday: true },
+];
+
+
+export const ATTENDANCE_STATUS_CONFIG: Record<
+  AttendanceStatus,
+  {
+    label: string;
+    shortLabel: string;
+    emoji: string;
+    description: string;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+    textColor: string;
+    badgeClass: string;
+    activeBtnClass: string;
+    iconColor: string;
+  }
+> = {
+  present: {
+    label: 'Present',
+    shortLabel: 'Attended',
+    emoji: '✅',
+    description: 'Attended class session',
+    color: 'bg-emerald-500',
+    bgColor: 'bg-emerald-50/80',
+    borderColor: 'border-emerald-300',
+    textColor: 'text-emerald-800',
+    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    activeBtnClass: 'bg-emerald-600 text-white border-emerald-600 shadow-[0_4px_16px_rgba(5,150,105,0.35)] scale-[1.02]',
+    iconColor: '#059669',
+  },
+  absent: {
+    label: 'Absent',
+    shortLabel: 'Missed',
+    emoji: '❌',
+    description: 'Missed or bunked class',
+    color: 'bg-rose-500',
+    bgColor: 'bg-rose-50/80',
+    borderColor: 'border-rose-300',
+    textColor: 'text-rose-800',
+    badgeClass: 'bg-rose-50 text-rose-800 border-rose-200',
+    activeBtnClass: 'bg-rose-600 text-white border-rose-600 shadow-[0_4px_16px_rgba(225,29,72,0.35)] scale-[1.02]',
+    iconColor: '#E11D48',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    shortLabel: 'Off',
+    emoji: '⚪',
+    description: 'Class cancelled / not held (excluded from %)',
+    color: 'bg-slate-400',
+    bgColor: 'bg-slate-50/80',
+    borderColor: 'border-slate-300',
+    textColor: 'text-slate-700',
+    badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+    activeBtnClass: 'bg-slate-600 text-white border-slate-600 shadow-[0_4px_14px_rgba(71,85,105,0.25)] scale-[1.02]',
+    iconColor: '#64748B',
+  },
+  leave: {
+    label: 'Leave / OD',
+    shortLabel: 'Duty Leave',
+    emoji: '🟡',
+    description: 'Official duty / approved leave (excluded from %)',
+    color: 'bg-amber-500',
+    bgColor: 'bg-amber-50/80',
+    borderColor: 'border-amber-300',
+    textColor: 'text-amber-800',
+    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
+    activeBtnClass: 'bg-amber-500 text-white border-amber-500 shadow-[0_4px_14px_rgba(217,119,6,0.3)] scale-[1.02]',
+    iconColor: '#D97706',
+  },
+};
+
 
 // Update these with your actual subjects
 export const SUBJECTS = [

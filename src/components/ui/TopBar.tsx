@@ -88,13 +88,23 @@ export default function TopBar({ currentDate, prevDate, nextDate }: TopBarProps)
         {/* Right: Nav Links */}
         <nav className="flex items-center gap-1.5 sm:gap-2">
           <Link
-            href="/chat"
-            className="font-display text-xs font-semibold text-[#FF4F9A] hover:text-white
-                       px-3 py-1.5 rounded-full bg-[#FF4F9A]/10 hover:bg-[#FF4F9A] border border-[#FF4F9A]/30
+            href="/attendance"
+            className="font-display text-xs font-bold text-[#FF4F9A] hover:text-white
+                       px-3 py-1.5 rounded-full bg-[#FF4F9A]/15 hover:bg-[#FF4F9A] border border-[#FF4F9A]/30
                        hover:border-[#FF4F9A] shadow-xs transition-all active:scale-95 flex items-center gap-1"
           >
+            <span>📊</span>
+            <span>Attendance</span>
+          </Link>
+
+          <Link
+            href="/chat"
+            className="font-display text-xs font-medium text-[#3D2C36]/80 hover:text-[#FF4F9A]
+                       px-3 py-1.5 rounded-full bg-white/50 hover:bg-white/80 border border-white/80
+                       hover:border-[#FFD9E8] shadow-xs transition-all active:scale-95 flex items-center gap-1"
+          >
             <span>💬</span>
-            <span>Chat</span>
+            <span className="hidden sm:inline">Chat</span>
           </Link>
 
           <Link
