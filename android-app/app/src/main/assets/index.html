@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>EEE Batch Pulse</title>
+  <style>
+    :root {
+      --bg-canvas: #FFF6FA;
+      --bg-card: rgba(255, 255, 255, 0.82);
+      --pink-primary: #FF4F9A;
+      --pink-glow: rgba(255, 79, 154, 0.35);
+      --rose-deep: #C2185B;
+      --plum: #3D2C36;
+      --plum-muted: #846D7B;
+      --plum-light: #FCEFF5;
+      --border-pink: #FFD9E8;
+      --status-green: #059669;
+      --status-green-bg: #ECFDF5;
+      --status-amber: #D97706;
+      --status-amber-bg: #FFFBEB;
+      --status-red: #E11D48;
+      --status-red-bg: #FFF1F2;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-canvas);
+      color: var(--plum);
+      min-height: 100vh;
+      padding-bottom: 90px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Glass Cards */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(255, 79, 154, 0.08);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .glass-card-interactive:active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
+    }
+
+    /* Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-pink);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--plum);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topbar-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--rose-deep);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Batch Pill Toggle */
+    .batch-toggle {
+      display: inline-flex;
+      background: rgba(255, 79, 154, 0.1);
+      border: 1px solid var(--border-pink);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .batch-btn {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--plum-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .batch-btn.active {
+      background: var(--pink-primary);
+      color: #fff;
+      box-shadow: 0 2px 8px var(--pink-glow);
+    }
+
+    /* Bottom Nav Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 60;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 999px;
+      box-shadow: 0 8px 32px rgba(255, 79, 154, 0.22);
+      display: flex;
+      justify-content: space-around;
+      padding: 6px 8px;
+    }
+
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: var(--plum-muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+    }
+
+    .nav-tab.active {
+      background: var(--pink-primary);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--pink-glow);
+    }
+
+    .nav-icon {
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 14px 16px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--pink-primary);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 14px var(--pink-glow);
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.96);
+      background: var(--rose-deep);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--rose-deep);
+      border: 1px solid var(--border-pink);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.96);
+      background: var(--plum-light);
+    }
+
+    /* 2x2 Attendance Buttons */
+    .att-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .att-btn {
+      min-height: 44px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .att-btn:active {
+      transform: scale(0.95);
+    }
+
+    .att-btn.present {
+      background: var(--status-green-bg);
+      color: var(--status-green);
+      border-color: rgba(5, 150, 105, 0.25);
+    }
+    .att-btn.present.active {
+      background: var(--status-green);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(5, 150, 105, 0.35);
+    }
+
+    .att-btn.absent {
+      background: var(--status-red-bg);
+      color: var(--status-red);
+      border-color: rgba(225, 29, 72, 0.25);
+    }
+    .att-btn.absent.active {
+      background: var(--status-red);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.35);
+    }
+
+    .att-btn.cancelled {
+      background: #F3F4F6;
+      color: #4B5563;
+      border-color: #E5E7EB;
+    }
+    .att-btn.cancelled.active {
+      background: #4B5563;
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(75, 85, 99, 0.35);
+    }
+
+    .att-btn.leave {
+      background: var(--status-amber-bg);
+      color: var(--status-amber);
+      border-color: rgba(217, 119, 6, 0.25);
+    }
+    .att-btn.leave.active {
+      background: var(--status-amber);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(217, 119, 6, 0.35);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-lab {
+      background: #EDE9FE;
+      color: #6D28D9;
+      border: 1px solid #DDD6FE;
+    }
+
+    .badge-lecture {
+      background: rgba(255, 79, 154, 0.12);
+      color: var(--rose-deep);
+      border: 1px solid var(--border-pink);
+    }
+
+    .badge-lunch {
+      background: #FEF3C7;
+      color: #B45309;
+      border: 1px solid #FDE68A;
+    }
+
+    .badge-library {
+      background: #E0F2FE;
+      color: #0369A1;
+      border: 1px solid #BAE6FD;
+    }
+
+    /* Stat Cards */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: #fff;
+      border: 1px solid var(--border-pink);
+      border-radius: 18px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--plum);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--plum-muted);
+      margin-top: 2px;
+    }
+
+    /* Form controls */
+    input[type="text"], input[type="date"], input[type="time"], select, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-pink);
+      border-radius: 12px;
+      background: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--plum);
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--pink-primary);
+      border-color: transparent;
+    }
+
+    /* Hide tab content */
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Pulse animation */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10B981;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title">⚡ EEE Pulse</div>
+      <div class="topbar-subtitle" id="currentDateDisplay">Today</div>
+    </div>
+    <div class="batch-toggle">
+      <button class="batch-btn active" id="btnBatchB1" onclick="setBatch('B1')">Batch B1</button>
+      <button class="batch-btn" id="btnBatchB2" onclick="setBatch('B2')">Batch B2</button>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="container">
+
+    <!-- ========================================================
+         TAB 1: TODAY FEED
+         ======================================================== -->
+    <section id="tabToday" class="tab-pane active">
+      
+      <!-- Quick Action: Mark All Attended -->
+      <div class="glass-card" style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,233,242,0.6)); border-color: var(--border-pink);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--plum);">⚡ Fast Daily Marking</div>
+            <div style="font-size: 11px; color: var(--plum-muted); margin-top: 2px;" id="todayScheduleCount">Loading classes...</div>
+          </div>
+          <button class="btn-primary" onclick="markAllToday('present')">
+            <span>✅</span> Attended All
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Day Selector -->
+      <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px;" id="dayPillList">
+        <!-- Generated by JS -->
+      </div>
+
+      <!-- Class Slots List for Selected Date -->
+      <div id="todaySlotList">
+        <!-- Generated by JS -->
+      </div>
+    </section>
+
+
+    <!-- ========================================================
+         TAB 2: MASTER TIMETABLE
+         ======================================================== -->
+    <section id="tabTimetable" class="tab-pane">
+      <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 16px; font-weight: 800;">🗓️ Master Timetable</div>
+            <div style="font-size: 11px; color: var(--plum-muted);">UIT RGPV Bhopal • B.Tech I SEM (EX)</div>
+          </div>
+        </div>
+
+        <!-- Day Selector for Timetable -->
+        <div style="display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px;" id="timetableDaySelector">
+          <button class="btn-secondary" onclick="renderTimetableDay(1)" id="ttDay1">Mon</button>
+          <button class="btn-secondary" onclick="renderTimetableDay(2)" id="ttDay2">Tue</button>
+          <button class="btn-secondary" onclick="renderTimetableDay(3)" id="ttDay3">Wed</button>
+          <button class="btn-secondary" onclick="renderTimetableDay(4)" id="ttDay4">Thu</button>
+          <button class="btn-secondary" onclick="renderTimetableDay(5)" id="ttDay5">Fri</button>
+        </div>
+
+        <!-- Timetable Day Content -->
+        <div id="timetableSlotContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ========================================================
+         TAB 3: ATTENDANCE & BUNK MATH
+         ======================================================== -->
+    <section id="tabAttendance" class="tab-pane">
+      
+      <!-- Overall Stats Summary Card -->
+      <div class="glass-card" style="border-left: 4px solid var(--pink-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--rose-deep); text-transform: uppercase;">Overall Attendance</div>
+            <div style="font-size: 32px; font-weight: 800; color: var(--plum); line-height: 1.1;" id="overallPercentDisplay">0.0%</div>
+            <div style="font-size: 12px; color: var(--plum-muted); margin-top: 4px;" id="overallClassRatio">0 / 0 Classes Attended</div>
+          </div>
+          <div style="text-align: right;">
+            <div class="badge" id="overallStatusBadge" style="background: var(--status-green-bg); color: var(--status-green);">SAFE</div>
+            <div style="font-size: 11px; color: var(--plum-muted); margin-top: 4px;">Target: <strong id="targetPercentLabel">80%</strong></div>
+          </div>
+        </div>
+
+        <!-- Safe Bunk Buffer Box -->
+        <div style="margin-top: 14px; padding: 12px; border-radius: 14px; background: rgba(255,79,154,0.08); border: 1px solid var(--border-pink);">
+          <div style="font-size: 13px; font-weight: 700; color: var(--rose-deep); display: flex; align-items: center; gap: 6px;">
+            <span>🛡️ Safe-to-Bunk Quota</span>
+          </div>
+          <div style="font-size: 12px; color: var(--plum); margin-top: 4px;" id="bunkAdviceText">
+            Calculating safe-to-bunk buffer...
+          </div>
+        </div>
+      </div>
+
+      <!-- Subject-Wise List -->
+      <div class="glass-card">
+        <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px;">📊 Subject-Wise Breakdown</div>
+        <div id="subjectAttendanceList" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- Semester & Target Settings -->
+      <div class="glass-card">
+        <div style="font-size: 14px; font-weight: 800; margin-bottom: 12px;">⚙️ Semester & Benchmark Settings</div>
+        
+        <label style="font-size: 12px; font-weight: 700;">Target Attendance %</label>
+        <select id="settingTargetPercent" onchange="saveSemesterSettings()">
+          <option value="0.75">75% Benchmark</option>
+          <option value="0.80" selected>80% Benchmark</option>
+          <option value="0.85">85% Benchmark</option>
+          <option value="0.90">90% Benchmark</option>
+        </select>
+
+        <label style="font-size: 12px; font-weight: 700;">Semester Start Date</label>
+        <input type="date" id="settingStartDate" value="2026-08-17" onchange="saveSemesterSettings()" />
+
+        <label style="font-size: 12px; font-weight: 700;">Semester End Date</label>
+        <input type="date" id="settingEndDate" value="2026-12-29" onchange="saveSemesterSettings()" />
+      </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         TAB 4: REMINDERS & NOTIFICATIONS (Alarms)
+         ======================================================== -->
+    <section id="tabReminders" class="tab-pane">
+      
+      <!-- New Reminder Form Card -->
+      <div class="glass-card">
+        <div style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">🔔 Class Reminders & Alarms</div>
+        <div style="font-size: 11px; color: var(--plum-muted); margin-bottom: 14px;">Set phone alerts, assignment deadlines & important class alarms.</div>
+
+        <label style="font-size: 12px; font-weight: 700;">Reminder Title</label>
+        <input type="text" id="remTitle" placeholder="e.g. Bring Graphics Lab Sheet, Math Test" />
+
+        <label style="font-size: 12px; font-weight: 700;">Note / Details</label>
+        <input type="text" id="remNote" placeholder="e.g. Room 106, Dr. Rashmi Gupta" />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="font-size: 12px; font-weight: 700;">Date</label>
+            <input type="date" id="remDate" />
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: 700;">Time</label>
+            <input type="time" id="remTime" value="09:50" />
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 6px;">
+          <button class="btn-primary" style="flex: 1;" onclick="addReminder()">
+            <span>⏰</span> Set Reminder Alarm
+          </button>
+          <button class="btn-secondary" onclick="testInstantAlarm()">
+            <span>🔔</span> Test Alert
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Reminders List -->
+      <div class="glass-card">
+        <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px;">📋 Scheduled Alarms & Tasks</div>
+        <div id="reminderListContainer" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ========================================================
+         TAB 5: BOOKS & SYLLABUS
+         ======================================================== -->
+    <section id="tabBooks" class="tab-pane">
+      <div class="glass-card">
+        <div style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">📚 1st Sem Books & Syllabus</div>
+        <div style="font-size: 11px; color: var(--plum-muted); margin-bottom: 14px;">Curated textbook guide for Electrical Engineering (Section EX).</div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          
+          <div style="padding: 12px; border-radius: 14px; background: #fff; border: 1px solid var(--border-pink);">
+            <div style="font-size: 13px; font-weight: 800; color: var(--rose-deep);">Mathematics – I</div>
+            <div style="font-size: 12px; color: var(--plum); margin-top: 2px;">• <em>Higher Engineering Mathematics</em> by B.S. Grewal</div>
+            <div style="font-size: 12px; color: var(--plum);">• <em>Advanced Engineering Mathematics</em> by Erwin Kreyszig</div>
+          </div>
+
+          <div style="padding: 12px; border-radius: 14px; background: #fff; border: 1px solid var(--border-pink);">
+            <div style="font-size: 13px; font-weight: 800; color: var(--rose-deep);">Fundamentals of Electrical Engg</div>
+            <div style="font-size: 12px; color: var(--plum); margin-top: 2px;">• <em>Basic Electrical Engineering</em> by D.C. Kulshreshtha</div>
+            <div style="font-size: 12px; color: var(--plum);">• <em>Principles of Electrical Engineering</em> by V.K. Mehta</div>
+          </div>
+
+          <div style="padding: 12px; border-radius: 14px; background: #fff; border: 1px solid var(--border-pink);">
+            <div style="font-size: 13px; font-weight: 800; color: var(--rose-deep);">Engineering Science</div>
+            <div style="font-size: 12px; color: var(--plum); margin-top: 2px;">• <em>Engineering Physics</em> by Gaur & Gupta</div>
+            <div style="font-size: 12px; color: var(--plum);">• <em>Engineering Chemistry</em> by Jain & Jain</div>
+          </div>
+
+          <div style="padding: 12px; border-radius: 14px; background: #fff; border: 1px solid var(--border-pink);">
+            <div style="font-size: 13px; font-weight: 800; color: var(--rose-deep);">Renewable Energy Resources</div>
+            <div style="font-size: 12px; color: var(--plum); margin-top: 2px;">• <em>Non-Conventional Energy Resources</em> by B.H. Khan</div>
+          </div>
+
+          <div style="padding: 12px; border-radius: 14px; background: #fff; border: 1px solid var(--border-pink);">
+            <div style="font-size: 13px; font-weight: 800; color: var(--rose-deep);">Engineering Graphics & Workshop</div>
+            <div style="font-size: 12px; color: var(--plum); margin-top: 2px;">• <em>Engineering Drawing</em> by N.D. Bhatt</div>
+            <div style="font-size: 12px; color: var(--plum);">• <em>Elements of Workshop Technology</em> by Hazra Choudhary</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM FLOATING NAVIGATION BAR -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" id="tabNavToday" onclick="switchTab('tabToday', 'tabNavToday')">
+      <span class="nav-icon">⚡</span>
+      <span>Today</span>
+    </button>
+    <button class="nav-tab" id="tabNavTimetable" onclick="switchTab('tabTimetable', 'tabNavTimetable')">
+      <span class="nav-icon">🗓️</span>
+      <span>Timetable</span>
+    </button>
+    <button class="nav-tab" id="tabNavAttendance" onclick="switchTab('tabAttendance', 'tabNavAttendance')">
+      <span class="nav-icon">📊</span>
+      <span>Attendance</span>
+    </button>
+    <button class="nav-tab" id="tabNavReminders" onclick="switchTab('tabReminders', 'tabNavReminders')">
+      <span class="nav-icon">🔔</span>
+      <span>Reminders</span>
+    </button>
+    <button class="nav-tab" id="tabNavBooks" onclick="switchTab('tabBooks', 'tabNavBooks')">
+      <span class="nav-icon">📚</span>
+      <span>Books</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================
+       JAVASCRIPT APPLICATION LOGIC
+       ======================================================== -->
+  <script>
+    // 1. MASTER TIMETABLE DATA
+    const TIMETABLE_DATA = [
+      // Monday (1)
+      { id: "mon-1-b1", dayOfWeek: 1, startTime: "10:00", endTime: "13:00", subject: "Manufacturing Practices Lab", faculty: "Dr. Prashant Sharma / Rajesh Tiwari", room: "Lab", batch: "B1", sessionType: "lab" },
+      { id: "mon-1-b2", dayOfWeek: 1, startTime: "10:00", endTime: "13:00", subject: "Engineering Graphics Lab", faculty: "Dharmendra Singh Rajput (DSR)", room: "Lab", batch: "B2", sessionType: "lab" },
+      { id: "mon-lunch", dayOfWeek: 1, startTime: "13:00", endTime: "13:50", subject: "Lunch Break", faculty: "", room: "", batch: null, sessionType: "lunch" },
+      { id: "mon-2-b1", dayOfWeek: 1, startTime: "13:50", endTime: "15:40", subject: "English Lab", faculty: "Dr. Noeen Khaliq (NQ)", room: "Lab", batch: "B1", sessionType: "lab" },
+      { id: "mon-2-b2", dayOfWeek: 1, startTime: "13:50", endTime: "15:40", subject: "Engineering Science", faculty: "Ravendra K Ray (RA)", room: "Room 106", batch: "B2", sessionType: "lecture" },
+      { id: "mon-3", dayOfWeek: 1, startTime: "15:40", endTime: "16:35", subject: "Engineering Science", faculty: "Ravendra K Ray (RA)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "mon-4", dayOfWeek: 1, startTime: "16:35", endTime: "17:30", subject: "Environmental Sciences", faculty: "Bineet Khampariya (BK)", room: "Room 106", batch: null, sessionType: "lecture" },
+
+      // Tuesday (2)
+      { id: "tue-1", dayOfWeek: 2, startTime: "10:00", endTime: "11:00", subject: "Renewable Energy Resources", faculty: "Akansha Mercy Steele (AMS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "tue-2", dayOfWeek: 2, startTime: "11:00", endTime: "12:00", subject: "Engineering Science", faculty: "Ravendra K Ray (RA)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "tue-3", dayOfWeek: 2, startTime: "12:00", endTime: "13:00", subject: "Fundamentals of Electrical Engineering", faculty: "Pankaj Sarsia (PS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "tue-lunch", dayOfWeek: 2, startTime: "13:00", endTime: "13:50", subject: "Lunch Break", faculty: "", room: "", batch: null, sessionType: "lunch" },
+      { id: "tue-4", dayOfWeek: 2, startTime: "13:50", endTime: "14:45", subject: "Mathematics – I", faculty: "Dr. Rashmi Gupta (RG) / Bhawna Soni (BS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "tue-5", dayOfWeek: 2, startTime: "14:45", endTime: "15:40", subject: "English", faculty: "Dr. Noeen Khaliq (NQ)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "tue-6-b1", dayOfWeek: 2, startTime: "15:40", endTime: "17:30", subject: "Engineering Science", faculty: "Ravendra K Ray (RA)", room: "Room 106", batch: "B1", sessionType: "lecture" },
+      { id: "tue-6-b2", dayOfWeek: 2, startTime: "15:40", endTime: "17:30", subject: "Library", faculty: "", room: "Library", batch: "B2", sessionType: "library" },
+
+      // Wednesday (3)
+      { id: "wed-1", dayOfWeek: 3, startTime: "10:00", endTime: "11:00", subject: "Mathematics – I", faculty: "Dr. Rashmi Gupta (RG) / Bhawna Soni (BS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "wed-2", dayOfWeek: 3, startTime: "11:00", endTime: "12:00", subject: "Renewable Energy Resources", faculty: "Akansha Mercy Steele (AMS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "wed-3", dayOfWeek: 3, startTime: "12:00", endTime: "13:00", subject: "English", faculty: "Dr. Noeen Khaliq (NQ)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "wed-lunch", dayOfWeek: 3, startTime: "13:00", endTime: "13:50", subject: "Lunch Break", faculty: "", room: "", batch: null, sessionType: "lunch" },
+      { id: "wed-4-b1", dayOfWeek: 3, startTime: "13:50", endTime: "15:40", subject: "Library", faculty: "", room: "Library", batch: "B1", sessionType: "library" },
+      { id: "wed-4-b2", dayOfWeek: 3, startTime: "13:50", endTime: "15:40", subject: "English Lab", faculty: "Dr. Noeen Khaliq (NQ)", room: "Lab", batch: "B2", sessionType: "lab" },
+      { id: "wed-5", dayOfWeek: 3, startTime: "15:40", endTime: "16:35", subject: "Engineering Science", faculty: "Ravendra K Ray (RA)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "wed-6", dayOfWeek: 3, startTime: "16:35", endTime: "17:30", subject: "Fundamentals of Electrical Engineering", faculty: "Pankaj Sarsia (PS)", room: "Room 106", batch: null, sessionType: "lecture" },
+
+      // Thursday (4)
+      { id: "thu-1", dayOfWeek: 4, startTime: "10:00", endTime: "11:00", subject: "English", faculty: "Dr. Noeen Khaliq (NQ)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "thu-2", dayOfWeek: 4, startTime: "11:00", endTime: "12:00", subject: "Engineering Science", faculty: "Ravendra K Ray (RA)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "thu-3", dayOfWeek: 4, startTime: "12:00", endTime: "13:00", subject: "Fundamentals of Electrical Engineering", faculty: "Pankaj Sarsia (PS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "thu-lunch", dayOfWeek: 4, startTime: "13:00", endTime: "13:50", subject: "Lunch Break", faculty: "", room: "", batch: null, sessionType: "lunch" },
+      { id: "thu-4", dayOfWeek: 4, startTime: "13:50", endTime: "14:45", subject: "Mathematics – I", faculty: "Dr. Rashmi Gupta (RG) / Bhawna Soni (BS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "thu-5-b1", dayOfWeek: 4, startTime: "14:45", endTime: "17:30", subject: "Engineering Graphics Lab", faculty: "Dharmendra Singh Rajput (DSR)", room: "Lab", batch: "B1", sessionType: "lab" },
+      { id: "thu-5-b2", dayOfWeek: 4, startTime: "14:45", endTime: "17:30", subject: "Manufacturing Practices Lab", faculty: "Dr. Prashant Sharma / Rajesh Tiwari", room: "Lab", batch: "B2", sessionType: "lab" },
+
+      // Friday (5)
+      { id: "fri-1", dayOfWeek: 5, startTime: "10:00", endTime: "11:00", subject: "English", faculty: "Dr. Noeen Khaliq (NQ)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "fri-2", dayOfWeek: 5, startTime: "11:00", endTime: "12:00", subject: "Fundamentals of Electrical Engineering", faculty: "Pankaj Sarsia (PS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "fri-3", dayOfWeek: 5, startTime: "12:00", endTime: "13:00", subject: "Fundamentals of Electrical Engineering", faculty: "Pankaj Sarsia (PS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "fri-lunch", dayOfWeek: 5, startTime: "13:00", endTime: "13:50", subject: "Lunch Break", faculty: "", room: "", batch: null, sessionType: "lunch" },
+      { id: "fri-4", dayOfWeek: 5, startTime: "13:50", endTime: "14:45", subject: "Renewable Energy Resources", faculty: "Akansha Mercy Steele (AMS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "fri-5", dayOfWeek: 5, startTime: "14:45", endTime: "15:40", subject: "Mathematics – I", faculty: "Dr. Rashmi Gupta (RG) / Bhawna Soni (BS)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "fri-6", dayOfWeek: 5, startTime: "15:40", endTime: "16:35", subject: "Environmental Sciences", faculty: "Bineet Khampariya (BK)", room: "Room 106", batch: null, sessionType: "lecture" },
+      { id: "fri-7", dayOfWeek: 5, startTime: "16:35", endTime: "17:30", subject: "Library", faculty: "", room: "Library", batch: null, sessionType: "library" },
+    ];
+
+    // 2. STATE & STORAGE KEYS
+    const KEY_ATTENDANCE = "eee_pulse_attendance_records";
+    const KEY_SETTINGS = "eee_pulse_semester_settings";
+    const KEY_REMINDERS = "eee_pulse_reminders";
+
+    let currentBatch = localStorage.getItem("eee_pulse_user_batch") || "B1";
+    let selectedDate = getTodayString();
+    let semesterSettings = JSON.parse(localStorage.getItem(KEY_SETTINGS)) || {
+      targetPercent: 0.80,
+      startDate: "2026-08-17",
+      endDate: "2026-12-29"
+    };
+
+    function getAttendanceRecords() {
+      try {
+        return JSON.parse(localStorage.getItem(KEY_ATTENDANCE)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveAttendanceRecords(records) {
+      localStorage.setItem(KEY_ATTENDANCE, JSON.stringify(records));
+      renderTodaySlots();
+      renderAttendanceStats();
+    }
+
+    function getTodayString() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatDisplayDate(dateStr) {
+      const d = new Date(dateStr + "T00:00:00");
+      return d.toLocaleDateString("en-IN", { weekday: "short", month: "short", day: "numeric" });
+    }
+
+    // 3. TAB SWITCHING
+    function switchTab(tabId, navBtnId) {
+      document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+      document.getElementById(navBtnId).classList.add("active");
+
+      if (tabId === "tabAttendance") renderAttendanceStats();
+      if (tabId === "tabTimetable") renderTimetableDay(new Date().getDay() || 1);
+      if (tabId === "tabReminders") renderRemindersList();
+    }
+
+    // 4. BATCH SWITCHING
+    function setBatch(batch) {
+      currentBatch = batch;
+      localStorage.setItem("eee_pulse_user_batch", batch);
+      document.getElementById("btnBatchB1").classList.toggle("active", batch === "B1");
+      document.getElementById("btnBatchB2").classList.toggle("active", batch === "B2");
+      renderTodaySlots();
+      renderAttendanceStats();
+      if (window.Android && window.Android.showToast) {
+        window.Android.showToast(`Switched to Batch ${batch}`);
+      }
+    }
+
+    // 5. TODAY FEED LOGIC
+    function renderDayPills() {
+      const container = document.getElementById("dayPillList");
+      const today = new Date();
+      let html = "";
+      for (let i = -3; i <= 3; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const isSelected = dStr === selectedDate;
+        const dayLabel = i === 0 ? "Today" : d.toLocaleDateString("en-IN", { weekday: "short" });
+        const dateNum = d.getDate();
+
+        html += `
+          <button class="btn-secondary ${isSelected ? 'active' : ''}" 
+                  style="${isSelected ? 'background: var(--pink-primary); color: #fff; border-color: var(--pink-primary);' : ''}"
+                  onclick="selectDate('${dStr}')">
+            <span style="font-size: 10px; text-transform: uppercase;">${dayLabel}</span>
+            <strong style="font-size: 13px;">${dateNum}</strong>
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    function selectDate(dStr) {
+      selectedDate = dStr;
+      renderDayPills();
+      renderTodaySlots();
+    }
+
+    function renderTodaySlots() {
+      const container = document.getElementById("todaySlotList");
+      const targetDate = new Date(selectedDate + "T00:00:00");
+      const dayOfWeek = targetDate.getDay(); // 0 is Sun, 1 is Mon...
+
+      document.getElementById("currentDateDisplay").textContent = formatDisplayDate(selectedDate);
+
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        container.innerHTML = `
+          <div class="glass-card" style="text-align: center; padding: 30px;">
+            <div style="font-size: 32px;">🏖️</div>
+            <div style="font-size: 16px; font-weight: 800; margin-top: 8px;">Weekend — No Scheduled Classes</div>
+            <div style="font-size: 12px; color: var(--plum-muted); margin-top: 4px;">Enjoy your break or revise your coursework!</div>
+          </div>
+        `;
+        document.getElementById("todayScheduleCount").textContent = "Weekend";
+        return;
+      }
+
+      // Filter for active batch
+      const slots = TIMETABLE_DATA.filter(slot => {
+        if (slot.dayOfWeek !== dayOfWeek) return false;
+        if (slot.sessionType === "lunch") return false;
+        return !slot.batch || slot.batch === currentBatch;
+      });
+
+      document.getElementById("todayScheduleCount").textContent = `${slots.length} Classes for Batch ${currentBatch}`;
+
+      const records = getAttendanceRecords();
+
+      let html = "";
+      slots.forEach(slot => {
+        const recordKey = `${selectedDate}_${slot.id}`;
+        const currentStatus = records[recordKey] || null;
+
+        const isLab = slot.sessionType === "lab";
+        const badgeClass = isLab ? "badge-lab" : (slot.sessionType === "library" ? "badge-library" : "badge-lecture");
+
+        html += `
+          <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-size: 12px; font-weight: 700; color: var(--plum-muted);">${slot.startTime} – ${slot.endTime}</div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--plum); margin-top: 2px;">${slot.subject}</div>
+                <div style="font-size: 12px; color: var(--plum-muted); margin-top: 2px;">
+                  📍 ${slot.room || "Room 106"} ${slot.faculty ? "• " + slot.faculty : ""}
+                </div>
+              </div>
+              <span class="badge ${badgeClass}">${slot.batch ? slot.batch + " " : ""}${slot.sessionType}</span>
+            </div>
+
+            <!-- Status Buttons Grid -->
+            <div class="att-grid">
+              <button class="att-btn present ${currentStatus === 'present' ? 'active' : ''}" onclick="markSlot('${selectedDate}', '${slot.id}', 'present')">
+                <span>✅</span> Attended
+              </button>
+              <button class="att-btn absent ${currentStatus === 'absent' ? 'active' : ''}" onclick="markSlot('${selectedDate}', '${slot.id}', 'absent')">
+                <span>❌</span> Missed
+              </button>
+              <button class="att-btn cancelled ${currentStatus === 'cancelled' ? 'active' : ''}" onclick="markSlot('${selectedDate}', '${slot.id}', 'cancelled')">
+                <span>⚪</span> Cancelled
+              </button>
+              <button class="att-btn leave ${currentStatus === 'leave' ? 'active' : ''}" onclick="markSlot('${selectedDate}', '${slot.id}', 'leave')">
+                <span>🟡</span> Leave
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function markSlot(dateStr, slotId, status) {
+      const records = getAttendanceRecords();
+      const recordKey = `${dateStr}_${slotId}`;
+
+      // Toggle off if clicking active
+      if (records[recordKey] === status) {
+        delete records[recordKey];
+      } else {
+        records[recordKey] = status;
+      }
+
+      saveAttendanceRecords(records);
+      if (window.Android && window.Android.vibrate) {
+        window.Android.vibrate(30);
+      }
+    }
+
+    function markAllToday(status) {
+      const targetDate = new Date(selectedDate + "T00:00:00");
+      const dayOfWeek = targetDate.getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) return;
+
+      const slots = TIMETABLE_DATA.filter(slot => {
+        if (slot.dayOfWeek !== dayOfWeek) return false;
+        if (slot.sessionType === "lunch") return false;
+        return !slot.batch || slot.batch === currentBatch;
+      });
+
+      const records = getAttendanceRecords();
+      slots.forEach(slot => {
+        records[`${selectedDate}_${slot.id}`] = status;
+      });
+
+      saveAttendanceRecords(records);
+      if (window.Android && window.Android.showToast) {
+        window.Android.showToast(`Marked all classes as attended for ${formatDisplayDate(selectedDate)}`);
+        window.Android.vibrate(50);
+      }
+    }
+
+    // 6. TIMETABLE TAB LOGIC
+    function renderTimetableDay(dayNum) {
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`ttDay${i}`);
+        if (btn) {
+          btn.style.background = i === dayNum ? "var(--pink-primary)" : "#fff";
+          btn.style.color = i === dayNum ? "#fff" : "var(--rose-deep)";
+          btn.style.borderColor = i === dayNum ? "var(--pink-primary)" : "var(--border-pink)";
+        }
+      }
+
+      const container = document.getElementById("timetableSlotContainer");
+      const slots = TIMETABLE_DATA.filter(s => s.dayOfWeek === dayNum && (!s.batch || s.batch === currentBatch));
+
+      let html = "";
+      slots.forEach(s => {
+        if (s.sessionType === "lunch") {
+          html += `
+            <div style="text-align: center; padding: 8px; margin: 8px 0; background: var(--plum-light); border-radius: 12px; font-size: 11px; font-weight: 700; color: #B45309;">
+              🥪 ${s.startTime} – ${s.endTime} • Lunch Break
+            </div>
+          `;
+          return;
+        }
+
+        const isLab = s.sessionType === "lab";
+        const badgeClass = isLab ? "badge-lab" : (s.sessionType === "library" ? "badge-library" : "badge-lecture");
+
+        html += `
+          <div style="display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border-pink); align-items: center;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--rose-deep); width: 80px; shrink: 0;">
+              ${s.startTime}<br/><span style="color: var(--plum-muted); font-weight: 500;">${s.endTime}</span>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 13px; font-weight: 800; color: var(--plum);">${s.subject}</div>
+              <div style="font-size: 11px; color: var(--plum-muted); margin-top: 2px;">
+                ${s.room} ${s.faculty ? "• " + s.faculty : ""}
+              </div>
+            </div>
+            <span class="badge ${badgeClass}">${s.batch ? s.batch : "EX"}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 7. ATTENDANCE & BUNK MATH ENGINE
+    function renderAttendanceStats() {
+      const records = getAttendanceRecords();
+      const targetP = semesterSettings.targetPercent || 0.80;
+      document.getElementById("targetPercentLabel").textContent = `${Math.round(targetP * 100)}%`;
+
+      let totalLogged = 0;
+      let totalPresent = 0;
+      const subjectMap = {};
+
+      Object.entries(records).forEach(([key, status]) => {
+        const parts = key.split("_");
+        const dateStr = parts[0];
+        const slotId = parts[1];
+
+        // Check if date inside semester
+        if (dateStr < semesterSettings.startDate || dateStr > semesterSettings.endDate) return;
+
+        const slot = TIMETABLE_DATA.find(s => s.id === slotId);
+        if (!slot) return;
+        if (slot.batch && slot.batch !== currentBatch) return;
+
+        if (!subjectMap[slot.subject]) {
+          subjectMap[slot.subject] = { total: 0, attended: 0 };
+        }
+
+        if (status === "present") {
+          totalLogged++;
+          totalPresent++;
+          subjectMap[slot.subject].total++;
+          subjectMap[slot.subject].attended++;
+        } else if (status === "absent") {
+          totalLogged++;
+          subjectMap[slot.subject].total++;
+        }
+        // cancelled & leave are excluded from denominator
+      });
+
+      const overallPercent = totalLogged > 0 ? (totalPresent / totalLogged) * 100 : 100.0;
+      document.getElementById("overallPercentDisplay").textContent = `${overallPercent.toFixed(1)}%`;
+      document.getElementById("overallClassRatio").textContent = `${totalPresent} / ${totalLogged} Classes Logged`;
+
+      // Status Badge
+      const statusBadge = document.getElementById("overallStatusBadge");
+      if (overallPercent >= targetP * 100) {
+        statusBadge.textContent = "SAFE";
+        statusBadge.style.background = "var(--status-green-bg)";
+        statusBadge.style.color = "var(--status-green)";
+      } else {
+        statusBadge.textContent = "LOW ATTENDANCE";
+        statusBadge.style.background = "var(--status-red-bg)";
+        statusBadge.style.color = "var(--status-red)";
+      }
+
+      // Safe-to-Bunk Immediate Math
+      const adviceBox = document.getElementById("bunkAdviceText");
+      if (totalLogged === 0) {
+        adviceBox.textContent = `No classes recorded yet. Log your classes to see your safe-to-bunk buffer!`;
+      } else if (overallPercent >= targetP * 100) {
+        const immediateSafeBunks = Math.floor((totalPresent - targetP * totalLogged) / targetP);
+        adviceBox.innerHTML = `You have <strong>${overallPercent.toFixed(1)}%</strong> attendance. You can safely miss up to <strong>${immediateSafeBunks}</strong> consecutive classes right now and stay above ${Math.round(targetP * 100)}%!`;
+      } else {
+        const classesNeeded = Math.ceil((targetP * totalLogged - totalPresent) / (1 - targetP));
+        adviceBox.innerHTML = `⚠️ Attendance is below target. You need to attend the next <strong>${classesNeeded}</strong> classes consecutively to reach ${Math.round(targetP * 100)}%!`;
+      }
+
+      // Subject-wise Breakdown list
+      const subContainer = document.getElementById("subjectAttendanceList");
+      const distinctSubjects = [...new Set(TIMETABLE_DATA.map(s => s.subject).filter(s => s !== "Lunch Break" && s !== "Library"))];
+
+      let subHtml = "";
+      distinctSubjects.forEach(subject => {
+        const data = subjectMap[subject] || { total: 0, attended: 0 };
+        const subPct = data.total > 0 ? (data.attended / data.total) * 100 : 100.0;
+        const isSafe = subPct >= targetP * 100;
+
+        subHtml += `
+          <div style="padding: 10px; border-radius: 12px; background: #fff; border: 1px solid var(--border-pink); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: var(--plum);">${subject}</div>
+              <div style="font-size: 11px; color: var(--plum-muted); margin-top: 2px;">
+                ${data.attended} / ${data.total} attended
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 14px; font-weight: 800; color: ${isSafe ? 'var(--status-green)' : 'var(--status-red)'};">
+                ${subPct.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      subContainer.innerHTML = subHtml;
+    }
+
+    function saveSemesterSettings() {
+      semesterSettings.targetPercent = parseFloat(document.getElementById("settingTargetPercent").value);
+      semesterSettings.startDate = document.getElementById("settingStartDate").value;
+      semesterSettings.endDate = document.getElementById("settingEndDate").value;
+      localStorage.setItem(KEY_SETTINGS, JSON.stringify(semesterSettings));
+      renderAttendanceStats();
+      if (window.Android && window.Android.showToast) {
+        window.Android.showToast("Semester settings updated!");
+      }
+    }
+
+    // 8. REMINDERS & ALARMS ENGINE
+    function getReminders() {
+      try {
+        return JSON.parse(localStorage.getItem(KEY_REMINDERS)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveReminders(rems) {
+      localStorage.setItem(KEY_REMINDERS, JSON.stringify(rems));
+      renderRemindersList();
+    }
+
+    function addReminder() {
+      const title = document.getElementById("remTitle").value.trim();
+      const note = document.getElementById("remNote").value.trim();
+      const date = document.getElementById("remDate").value;
+      const time = document.getElementById("remTime").value;
+
+      if (!title) {
+        alert("Please enter a title for the reminder");
+        return;
+      }
+      if (!date || !time) {
+        alert("Please pick a date and time");
+        return;
+      }
+
+      const targetEpoch = new Date(`${date}T${time}:00`).getTime();
+      if (isNaN(targetEpoch)) {
+        alert("Invalid date or time");
+        return;
+      }
+
+      const id = Date.now() % 100000;
+      const newRem = { id, title, note, date, time, targetEpoch };
+
+      const rems = getReminders();
+      rems.push(newRem);
+      saveReminders(rems);
+
+      // Schedule exact alarm via Android bridge
+      if (window.Android && window.Android.scheduleAlarmAtTime) {
+        window.Android.scheduleAlarmAtTime(id, title, note || "EEE Pulse Class Reminder", targetEpoch);
+      } else {
+        alert(`Reminder scheduled for ${date} at ${time}`);
+      }
+
+      document.getElementById("remTitle").value = "";
+      document.getElementById("remNote").value = "";
+    }
+
+    function deleteReminder(id) {
+      let rems = getReminders();
+      rems = rems.filter(r => r.id !== id);
+      saveReminders(rems);
+
+      if (window.Android && window.Android.cancelAlarm) {
+        window.Android.cancelAlarm(id);
+      }
+    }
+
+    function testInstantAlarm() {
+      if (window.Android && window.Android.triggerInstantNotification) {
+        window.Android.triggerInstantNotification("⚡ EEE Pulse Alert Test", "Classroom alarm & sound is working!");
+        window.Android.vibrate(300);
+      } else {
+        alert("🔔 Test alert triggered!");
+      }
+    }
+
+    function renderRemindersList() {
+      const container = document.getElementById("reminderListContainer");
+      const rems = getReminders();
+
+      if (rems.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: var(--plum-muted); font-size: 12px;">
+            No alarms set. Create a reminder above!
+          </div>
+        `;
+        return;
+      }
+
+      let html = "";
+      rems.forEach(rem => {
+        html += `
+          <div style="padding: 12px; border-radius: 14px; background: #fff; border: 1px solid var(--border-pink); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: var(--plum);">${rem.title}</div>
+              <div style="font-size: 11px; color: var(--plum-muted); margin-top: 2px;">
+                ⏰ ${rem.date} at ${rem.time} ${rem.note ? "• " + rem.note : ""}
+              </div>
+            </div>
+            <button class="btn-secondary" style="color: var(--status-red); border-color: rgba(225,29,72,0.3); padding: 4px 10px; font-size: 11px;" onclick="deleteReminder(${rem.id})">
+              Delete
+            </button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // 9. APP INITIALIZATION
+    window.addEventListener("DOMContentLoaded", () => {
+      // Set batch buttons
+      document.getElementById("btnBatchB1").classList.toggle("active", currentBatch === "B1");
+      document.getElementById("btnBatchB2").classList.toggle("active", currentBatch === "B2");
+
+      // Set default date picker values
+      document.getElementById("remDate").value = getTodayString();
+      document.getElementById("settingStartDate").value = semesterSettings.startDate;
+      document.getElementById("settingEndDate").value = semesterSettings.endDate;
+      document.getElementById("settingTargetPercent").value = String(semesterSettings.targetPercent);
+
+      renderDayPills();
+      renderTodaySlots();
+      renderAttendanceStats();
+    });
+  </script>
+</body>
+</html>
