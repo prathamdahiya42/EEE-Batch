@@ -189,6 +189,24 @@ export interface SubjectAttendanceStat {
   projectedPercentage: number;    // if remaining classes are attended
   hasWarning: boolean;            // true if projected or current falls below target
   isSafeForLeave: boolean;        // true if immediateSafeBunks > 0 or safeToBunkClasses > 0
+
+  // VoltTrack Mathematical Engine Metrics
+  voltTrack?: {
+    dBase: number;
+    dWorking: number;
+    nAttended: number;
+    nBunk: number;
+    nOfficial: number;
+    pProjected: number;
+    nMinReq: number;
+    bMaxAllowed: number;
+    sShield: number;
+    isSafe: boolean;
+    statusText: string;
+    dashOffset: number;
+    attendedWidth: number;
+    holidaysWidth: number;
+  };
 }
 
 export interface OverallAttendanceStat {
@@ -216,7 +234,26 @@ export interface OverallAttendanceStat {
   flaggedCount: number;
   safeLeaveSubjects: Array<{ subjectName: string; m: number; immediateM: number }>;
   atRiskSubjects: Array<{ subjectName: string; x: number; currentPercent: number }>;
+
+  // VoltTrack Mathematical Engine Metrics
+  voltTrack: {
+    dBase: number;
+    dWorking: number;
+    nAttended: number;
+    nBunk: number;
+    nOfficial: number;
+    pProjected: number;
+    nMinReq: number;
+    bMaxAllowed: number;
+    sShield: number;
+    isSafe: boolean;
+    statusText: string;
+    dashOffset: number;
+    attendedWidth: number;
+    holidaysWidth: number;
+  };
 }
+
 
 
 export interface MarkAttendanceResult {

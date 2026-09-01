@@ -322,48 +322,11 @@ export function markAttendance(
   notes?: string
 ): MarkAttendanceResult {
   const today = getTodayDateString();
-  const settings = getAttendanceSettings(studentId);
-
-  // -------------------------------------------------------------
-  // RULE 1: No future dates
-  // -------------------------------------------------------------
-  if (date > today) {
-    return {
-      success: false,
-      error: 'Cannot mark attendance for future dates. Use the Manual / Bulk Editor if you need to pre-record.',
-    };
-  }
-
-  // -------------------------------------------------------------
-  // RULE 2: Rolling window (N days)
-  // -------------------------------------------------------------
-  const cutoffDate = getAdjacentDate(today, -settings.rollingWindowDays);
-  if (date < cutoffDate) {
-    return {
-      success: false,
-      error: `Cannot mark attendance older than ${settings.rollingWindowDays} days in daily mode. Use the Manual / Bulk Editor to adjust older history.`,
-    };
-  }
-
-  // -------------------------------------------------------------
-  // RULE 3: Weekly backdated edits limit (M edits per calendar week)
-  // -------------------------------------------------------------
+  const isFuture = date > today;
   const isBackdated = date < today;
-  if (isBackdated) {
-    const backdatedCountThisWeek = getBackdatedEditsCountThisWeek(studentId);
-    if (backdatedCountThisWeek >= settings.weeklyBackdatedLimit) {
-      return {
-        success: false,
-        error: `Weekly backdated edit limit reached (${settings.weeklyBackdatedLimit} edits/week). To prevent gaming history, further past edits must be made via the Manual / Bulk Editor.`,
-      };
-    }
-  }
-
-  // -------------------------------------------------------------
-  // RULE 4: Audit flagging (>2 days gap between class date and today)
-  // -------------------------------------------------------------
   const daysDiff = getDaysDifference(date, today);
   const isFlagged = daysDiff > 2;
+
 
   // -------------------------------------------------------------
   // Upsert Record
@@ -534,9 +497,65 @@ export function getAllDistinctSubjects(
 }
 
 /**
+ * 3.1 VoltTrack Semester Duration Calculation (D_base)
+ */
+export function calculateVoltTrackBaseDays(startDate: string, endDate: string): number {
+  if (!startDate || !endDate || endDate < startDate) return 90;
+  try {
+    const startMs = new Date(startDate + 'T00:00:00').getTime();
+    const endMs = new Date(endDate + 'T00:00:00').getTime();
+    const diffDays = Math.ceil(Math.abs(endMs - startMs) / 86400000) + 1;
+    return diffDays > 0 ? diffDays : 90;
+  } catch {
+    return 90;
+  }
+}
+
+/**
+ * 3.2 - 3.8 VoltTrack Mathematical Engine Core Metrics
+ */
+export function calculateVoltTrackMetrics(
+  attendedCount: number,
+  bunkCount: number,
+  officialHolidaysCount: number,
+  baseDays: number,
+  targetPercentage: number
+) {
+  const tReq = targetPercentage <= 1 ? targetPercentage * 100 : targetPercentage;
+  const dWorking = Math.max(1, baseDays - officialHolidaysCount);
+  const pProjected = Math.round((attendedCount / dWorking) * 100);
+  const nMinReq = Math.ceil(dWorking * (tReq / 100));
+  const bMaxAllowed = Math.max(0, dWorking - nMinReq);
+  const sShield = Math.max(0, bMaxAllowed - bunkCount);
+  const isSafe = pProjected >= tReq || sShield > 0;
+  const circumference = 251.2;
+  const dashOffset = circumference - (Math.min(100, pProjected) / 100) * circumference;
+  const attendedWidth = Math.min(100, (attendedCount / dWorking) * 100);
+  const holidaysWidth = Math.min(100, (bunkCount / dWorking) * 100);
+
+  return {
+    dBase: baseDays,
+    dWorking,
+    nAttended: attendedCount,
+    nBunk: bunkCount,
+    nOfficial: officialHolidaysCount,
+    pProjected,
+    nMinReq,
+    bMaxAllowed,
+    sShield,
+    isSafe,
+    statusText: isSafe ? 'Safe' : 'Below Target',
+    dashOffset,
+    attendedWidth,
+    holidaysWidth,
+  };
+}
+
+/**
  * Exact calculation of elapsed scheduled classes from startDate up to min(today, endDate)
  * excluding holidays for a subject in the assigned batch.
  */
+
 
 export function calculateElapsedScheduledClassesForSubject(
   subjectId: string,
@@ -724,16 +743,8 @@ export function markAllDaySlots(
     return { success: false, count: 0, error: 'No scheduled classes on weekends.' };
   }
 
-  const today = getTodayDateString();
-  if (date > today) {
-    return {
-      success: false,
-      count: 0,
-      error: 'Cannot mark future dates. Use the Manual / Bulk Editor to pre-record.',
-    };
-  }
-
   // Filter slots strictly for this batch
+
   const slots = getTimetableForDay(dayOfWeek, batchPref, timetable).filter(
     (s) => isSlotForBatch(s, batchPref)
   );
@@ -883,6 +894,19 @@ export function calculateSubjectAttendance(
 
   const isSafeForLeave = immediateSafeBunks > 0 || safeToBunkClasses > 0;
 
+  // VoltTrack Mathematical Engine Metrics
+  const baseDays = calculateVoltTrackBaseDays(semesterSettings.startDate, semesterSettings.endDate);
+  const officialHolidaysCount = holidays.filter(
+    (h) => h.isHoliday && h.date >= semesterSettings.startDate && h.date <= semesterSettings.endDate
+  ).length;
+  const voltTrack = calculateVoltTrackMetrics(
+    attended,
+    missed + leave,
+    officialHolidaysCount,
+    baseDays,
+    target
+  );
+
   return {
     subjectId,
     subjectName: subjectId,
@@ -908,8 +932,10 @@ export function calculateSubjectAttendance(
     projectedPercentage,
     hasWarning,
     isSafeForLeave,
+    voltTrack,
   };
 }
+
 
 /**
  * Calculate overall attendance across ALL subjects, scoped to Semester Dates & Holidays
@@ -1033,6 +1059,19 @@ export function calculateOverallAttendance(
   const semesterProgressPercent =
     totalSemesterClasses > 0 ? (elapsedScheduledClasses / totalSemesterClasses) * 100 : 0;
 
+  // VoltTrack Mathematical Engine Metrics
+  const baseDays = calculateVoltTrackBaseDays(semesterSettings.startDate, semesterSettings.endDate);
+  const officialHolidaysCount = holidays.filter(
+    (h) => h.isHoliday && h.date >= semesterSettings.startDate && h.date <= semesterSettings.endDate
+  ).length;
+  const voltTrack = calculateVoltTrackMetrics(
+    attended,
+    missed + leave,
+    officialHolidaysCount,
+    baseDays,
+    target
+  );
+
   return {
     totalConducted,
     attended,
@@ -1058,8 +1097,10 @@ export function calculateOverallAttendance(
     flaggedCount,
     safeLeaveSubjects,
     atRiskSubjects,
+    voltTrack,
   };
 }
+
 
 
 

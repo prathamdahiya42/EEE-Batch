@@ -948,10 +948,42 @@ export default function AttendanceClient({ initialOverrides }: AttendanceClientP
         </nav>
 
         {/* ========================================================= */}
-        {/* TAB 1: DAILY CLASS MARKING */}
+        {/* TAB 1: DAILY CLASS MARKING & FULL SEMESTER CALENDAR */}
         {/* ========================================================= */}
         {selectedTab === 'daily' && (
           <section className="space-y-4 animate-fade-up">
+            
+            {/* Full Semester Month Quick Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide p-1 bg-white/70 rounded-2xl border border-[#FFD9E8] shadow-2xs">
+              <span className="text-[11px] font-bold font-mono px-2 text-[#3D2C36]/70 shrink-0">Month:</span>
+              {[
+                { label: 'Aug', dateStr: '2026-08-17' },
+                { label: 'Sep', dateStr: '2026-09-01' },
+                { label: 'Oct', dateStr: '2026-10-01' },
+                { label: 'Nov', dateStr: '2026-11-01' },
+                { label: 'Dec', dateStr: '2026-12-01' },
+              ].map((m) => {
+                const isCurrentMonth = selectedDate.startsWith(m.dateStr.substring(0, 7));
+                return (
+                  <button
+                    key={m.label}
+                    onClick={() => {
+                      // Jump to this month
+                      const targetDate = m.dateStr < semesterSettings.startDate ? semesterSettings.startDate : m.dateStr;
+                      setSelectedDate(targetDate);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer shrink-0 active:scale-95 ${
+                      isCurrentMonth
+                        ? 'bg-[#FF4F9A] text-white shadow-xs'
+                        : 'bg-white/80 text-[#3D2C36]/80 hover:bg-white hover:text-[#3D2C36]'
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Date Navigator Strip */}
             <div className="glass-card p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center justify-between sm:justify-start gap-2">
@@ -967,24 +999,20 @@ export default function AttendanceClient({ initialOverrides }: AttendanceClientP
                   <span className="font-display text-xs sm:text-sm font-bold text-[#3D2C36]">
                     {formatDateDisplay(selectedDate)}
                   </span>
-                  <span className="font-mono text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-[#FF4F9A]/10 text-[#C2185B] font-semibold">
-                    {selectedDate === today ? 'Today' : formatDateMonospace(selectedDate)}
+                  <span className={`font-mono text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-semibold ${
+                    selectedDate === today
+                      ? 'bg-[#FF4F9A]/10 text-[#C2185B]'
+                      : selectedDate > today
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    {selectedDate === today ? 'Today' : selectedDate > today ? 'Future' : 'Past'}
                   </span>
                 </div>
 
                 <button
-                  onClick={() => {
-                    const next = getAdjacentDate(selectedDate, 1);
-                    if (next <= today) {
-                      setSelectedDate(next);
-                    } else {
-                      showBanner('Cannot select future dates in Daily mode. Use Manual mode to pre-record.', 'error');
-                    }
-                  }}
-                  disabled={selectedDate >= today}
-                  className={`p-2 sm:p-1.5 rounded-full border border-[#FFD9E8] cursor-pointer active:scale-90 ${
-                    selectedDate >= today ? 'opacity-40 cursor-not-allowed' : 'text-[#3D2C36]/80 hover:text-[#FF4F9A] hover:bg-white/80'
-                  }`}
+                  onClick={() => setSelectedDate(getAdjacentDate(selectedDate, 1))}
+                  className="p-2 sm:p-1.5 rounded-full border border-[#FFD9E8] text-[#3D2C36]/80 hover:text-[#FF4F9A] hover:bg-white/80 cursor-pointer active:scale-90"
                   title="Next Day"
                 >
                   ▶
@@ -992,29 +1020,38 @@ export default function AttendanceClient({ initialOverrides }: AttendanceClientP
               </div>
 
               {/* Quick Jump Buttons & Date Input */}
-              <div className="flex items-center justify-between sm:justify-end gap-2">
+              <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => setSelectedDate(today)}
-                    className={`px-3 py-1.5 sm:py-1 rounded-xl text-xs font-bold font-mono cursor-pointer active:scale-95 ${
-                      selectedDate === today ? 'bg-[#FF4F9A] text-white' : 'bg-white/80 text-[#3D2C36] hover:bg-white'
-                    }`}
+                    onClick={() => setSelectedDate(semesterSettings.startDate)}
+                    className="px-2.5 py-1 rounded-xl text-[11px] font-bold font-mono bg-white/80 text-[#3D2C36] hover:bg-white border border-[#FFD9E8] cursor-pointer active:scale-95"
+                    title="Jump to Semester Start"
                   >
-                    Today
+                    ⏮ Start
                   </button>
                   <button
-                    onClick={() => setSelectedDate(getAdjacentDate(today, -1))}
-                    className="px-2.5 py-1.5 sm:py-1 rounded-xl text-xs font-bold font-mono bg-white/80 text-[#3D2C36] hover:bg-white cursor-pointer active:scale-95"
+                    onClick={() => setSelectedDate(today)}
+                    className={`px-3 py-1 rounded-xl text-[11px] font-bold font-mono cursor-pointer active:scale-95 ${
+                      selectedDate === today ? 'bg-[#FF4F9A] text-white' : 'bg-white/80 text-[#3D2C36] hover:bg-white border border-[#FFD9E8]'
+                    }`}
                   >
-                    Yesterday
+                    ⚡ Today
+                  </button>
+                  <button
+                    onClick={() => setSelectedDate(semesterSettings.endDate)}
+                    className="px-2.5 py-1 rounded-xl text-[11px] font-bold font-mono bg-white/80 text-[#3D2C36] hover:bg-white border border-[#FFD9E8] cursor-pointer active:scale-95"
+                    title="Jump to Semester End"
+                  >
+                    ⏭ End
                   </button>
                 </div>
                 <input
                   type="date"
-                  max={today}
+                  min={semesterSettings.startDate}
+                  max={semesterSettings.endDate}
                   value={selectedDate}
                   onChange={(e) => {
-                    if (e.target.value && e.target.value <= today) {
+                    if (e.target.value) {
                       setSelectedDate(e.target.value);
                     }
                   }}
@@ -1022,6 +1059,38 @@ export default function AttendanceClient({ initialOverrides }: AttendanceClientP
                 />
               </div>
             </div>
+
+            {/* Future Date Pre-Planning & Reminder Card */}
+            {selectedDate > today && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/90 to-indigo-50/90 border border-blue-200 text-blue-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl">⏰</span>
+                  <div>
+                    <span className="font-display font-bold block text-blue-900">
+                      Upcoming Class Date: {formatDateDisplay(selectedDate)}
+                    </span>
+                    <span className="font-mono text-[11px] text-blue-800">
+                      You can pre-plan attendance or set a reminder alarm so you are notified before classes start on this day.
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    playAlarmSound('chime');
+                    triggerVibration([200, 100, 200]);
+                    await sendLocalNotification(
+                      `⏰ Reminder: Classes for ${formatDateDisplay(selectedDate)}`,
+                      `You have classes scheduled on this day for Batch ${batchPref}. Tap to view schedule.`
+                    );
+                    showBanner(`Alarm reminder set for ${formatDateDisplay(selectedDate)}!`, 'success');
+                  }}
+                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-display text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all text-center shrink-0"
+                >
+                  🔔 Set Reminder Alarm
+                </button>
+              </div>
+            )}
 
             {/* One-Click Day Bulk Actions (Strictly for Student's Batch) */}
             {daySlots.length > 0 && !isSelectedDateHoliday && !isSelectedDateOutsideSemester && (
@@ -1083,17 +1152,6 @@ export default function AttendanceClient({ initialOverrides }: AttendanceClientP
               </div>
             )}
 
-            {/* Backdated edit warning */}
-            {selectedDate < today && !isSelectedDateHoliday && (
-              <div className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
-                <span>
-                  🗓️ <strong>Backdated Mode:</strong> Marking for past date ({selectedDate}). Quota: {backdatedUsedThisWeek}/{settings.weeklyBackdatedLimit} this week.
-                </span>
-                <span className="font-mono text-[10px] text-amber-700">
-                  {getDaysDifference(selectedDate, today) > 2 ? '⚠️ Late Entry (>2d) will be flagged' : '✓ Within 2 days'}
-                </span>
-              </div>
-            )}
 
             {/* List of class slots for this day (Strictly Batch-Filtered with 44px+ mobile touch targets) */}
             {daySlots.length > 0 ? (
