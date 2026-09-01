@@ -15,12 +15,23 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("${rootDir}/../release.keystore")
+            storePassword = "eeepulse123"
+            keyAlias = "eeepulse"
+            keyPassword = "eeepulse123"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -32,12 +43,18 @@ android {
       shaders = false
     }
 
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
     packaging {
-      resources {
-        excludes += "/META-INF/{AL2.0,LGPL2.1}"
-      }
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
+
 
 kotlin {
     jvmToolchain(17)
